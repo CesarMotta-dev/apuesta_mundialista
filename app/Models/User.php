@@ -47,4 +47,19 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function pollasAdministradas()
+    {
+        return $this->hasMany(Polla::class, 'administrador_id');
+    }
+
+    public function pollas()
+    {
+        return $this->belongsToMany(Polla::class, 'polla_user')->withTimestamps();
+    }
+
+    public function esAdministrador(): bool
+    {
+        return $this->rol === 'administrador';
+    }
 }

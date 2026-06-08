@@ -14,4 +14,15 @@ class Partido extends Model
         'goles_visitante',
         'estado'
     ];
+
+    // Esto ayuda a Laravel a tratar fecha_inicio como un objeto Carbon automáticamente
+    protected $casts = [
+        'fecha_inicio' => 'datetime',
+    ];
+
+    // Opcional: relación con el modelo Apuesta
+    public function apuestas()
+    {
+        return $this->hasMany(Apuesta::class);
+    }
 }

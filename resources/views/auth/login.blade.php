@@ -2,6 +2,18 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
+    <div class="mb-6 grid gap-3 sm:grid-cols-2">
+        <a href="{{ route('register', ['rol' => 'administrador']) }}" class="block rounded-lg border border-blue-200 bg-blue-50 p-4 transition hover:border-blue-400 hover:bg-blue-100">
+            <p class="text-sm font-bold uppercase tracking-wide text-blue-800">Administrador</p>
+            <p class="mt-1 text-sm text-blue-950">Crea tu polla, define el monto y administra tus apostadores.</p>
+        </a>
+
+        <a href="{{ route('register', ['rol' => 'apostador']) }}" class="block rounded-lg border border-emerald-200 bg-emerald-50 p-4 transition hover:border-emerald-400 hover:bg-emerald-100">
+            <p class="text-sm font-bold uppercase tracking-wide text-emerald-800">Apostador</p>
+            <p class="mt-1 text-sm text-emerald-950">Unete a una polla abierta y juega con el administrador que elijas.</p>
+        </a>
+    </div>
+
     <form method="POST" action="{{ route('login') }}">
         @csrf
 

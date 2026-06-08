@@ -1,19 +1,6 @@
 <?php
 
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
-
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],
@@ -35,4 +22,11 @@ return [
         ],
     ],
 
+    'api_football' => [
+        'key' => env('API_FOOTBALL_KEY'),
+        'url' => env('API_FOOTBALL_URL', 'https://v3.football.api-sports.io'),
+        'league' => env('API_FOOTBALL_LEAGUE', 1),
+        'season' => env('API_FOOTBALL_SEASON', 2026),
+        'next' => env('API_FOOTBALL_NEXT', 30),
+    ],
 ];
