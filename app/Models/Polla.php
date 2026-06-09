@@ -27,4 +27,8 @@ class Polla extends Model
     {
         return $this->belongsToMany(User::class, 'polla_user')->withTimestamps();
     }
+
+    public function partidos() {
+    return $this->hasMany(Partido::class);
+}
 }

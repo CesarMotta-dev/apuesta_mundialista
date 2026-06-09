@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Polla;
 use App\Services\FootballApiService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,4 +26,32 @@ class ApuestaController extends Controller
 
         return response()->json($resultado, $resultado['ok'] ? 200 : 500);
     }
+ // En app/Http/Controllers/ApuestaController.php
+public function join(Request $request, Polla $polla): RedirectResponse
+{
+    if ($request->user()->esAdministrador()) {
+        return redirect()->route('dashboard')->with('status', 'Los administradores gestionan pollas, no se unen como apostadores.');
+    }
+
+    if ($polla->estado !== 'abierta') {
+        return redirect()->route('dashboard')->with('status', 'Esta polla ya no esta abierta.');
+    }
+
+    // 1. Unir al usuario a la polla
+    $polla->apostadores()->syncWithoutDetaching([$request->user()->id]);
+
+    // 2. Crear las apuestas vacías para todos los partidos asociados a esta polla
+    foreach ($polla->partidos as $partido) {
+        \App\Models\Apuesta::firstOrCreate([
+            'user_id'    => $request->user()->id,
+            'partido_id' => $partido->id,
+            'polla_id'   => $polla->id,
+        ], [
+            'marcador_local' => null, // O 0, según prefieras
+            'marcador_visitante' => null,
+        ]);
+    }
+
+    return redirect()->route('dashboard')->with('status', 'Te uniste a la polla y tus boletas de apuesta fueron generadas.');
+}
 }

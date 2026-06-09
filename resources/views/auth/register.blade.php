@@ -1,62 +1,55 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
-        @csrf
+<div
+    style="background: linear-gradient(135deg, #051937 0%, #004d7a 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif;">
 
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-        </div>
+    <div style="
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 400px;
+        color: #333;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    ">
+        <h2 style="text-align: center; color: #e11d48; text-transform: uppercase; margin-top: 0;">Registrarse</h2>
 
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <form method="POST" action="{{ route('register') }}">
+            @csrf
 
-        <!-- Role -->
-        <div class="mt-4">
-            <x-input-label for="rol" value="Tipo de cuenta" />
-            <select id="rol" name="rol" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
-                <option value="apostador" @selected(old('rol', request('rol', 'apostador')) === 'apostador')>Apostador</option>
-                <option value="administrador" @selected(old('rol', request('rol')) === 'administrador')>Administrador</option>
-            </select>
-            <x-input-error :messages="$errors->get('rol')" class="mt-2" />
-        </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px;">Nombre</label>
+                <input type="text" name="name" required
+                    style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+            </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px;">Correo</label>
+                <input type="email" name="email" required
+                    style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+            </div>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px;">Contraseña</label>
+                <input type="password" name="password" required
+                    style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+            </div>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+            <button type="submit"
+                style="width: 100%; padding: 12px; background-color: #059669; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                CREAR MI CUENTA
+            </button>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">¿Cómo te registras?</label>
+                <select name="role" required
+                    style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
+                    <option value="apostador">Apostador</option>
+                    <option value="administrador">Administrador</option>
+                </select>
+            </div>
+        </form>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+        <p style="text-align: center; margin-top: 20px;">
+            ¿Ya tienes cuenta? <a href="{{ route('login') }}"
+                style="color: #e11d48; font-weight: bold; text-decoration: none;">Inicia sesión</a>
+        </p>
+    </div>
+</div>

@@ -1,59 +1,41 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<div
+    style="background: linear-gradient(135deg, #051937 0%, #004d7a 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; color: white; font-family: sans-serif;">
+    <div
+        style="background: #ffffff; padding: 40px; border-radius: 15px; width: 100%; max-width: 400px; color: #333; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        <h2 style="text-align: center; color: #e11d48; text-transform: uppercase;">Inicia Sesión</h2>
 
-    <div class="mb-6 grid gap-3 sm:grid-cols-2">
-        <a href="{{ route('register', ['rol' => 'administrador']) }}" class="block rounded-lg border border-blue-200 bg-blue-50 p-4 transition hover:border-blue-400 hover:bg-blue-100">
-            <p class="text-sm font-bold uppercase tracking-wide text-blue-800">Administrador</p>
-            <p class="mt-1 text-sm text-blue-950">Crea tu polla, define el monto y administra tus apostadores.</p>
-        </a>
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
+            <div style="margin-bottom: 15px;">
+                <label>Correo Electrónico</label>
+                <input type="email" name="email"
+                    style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label>Contraseña</label>
+                <input type="password" name="password"
+                    style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px;">
+            </div>
+            <button type="submit"
+                style="width: 100%; padding: 12px; background-color: #e11d48; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                ENTRAR A LA CANCHA
+            </button>
+            <div style="margin-top: 20px; text-align: center; font-size: 0.9rem;">
 
-        <a href="{{ route('register', ['rol' => 'apostador']) }}" class="block rounded-lg border border-emerald-200 bg-emerald-50 p-4 transition hover:border-emerald-400 hover:bg-emerald-100">
-            <p class="text-sm font-bold uppercase tracking-wide text-emerald-800">Apostador</p>
-            <p class="mt-1 text-sm text-emerald-950">Unete a una polla abierta y juega con el administrador que elijas.</p>
-        </a>
+                @if (Route::has('password.request'))
+                    <a href="{{ route('password.request') }}"
+                        style="color: #64748b; text-decoration: none; display: block; margin-bottom: 10px;">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                @endif
+
+                <p style="color: #333;">
+                    ¿Aún no tienes cuenta?
+                    <a href="{{ route('register') }}" style="color: #e11d48; font-weight: bold; text-decoration: none;">
+                        Regístrate aquí
+                    </a>
+                </p>
+            </div>
+        </form>
     </div>
-
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
-
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+</div>

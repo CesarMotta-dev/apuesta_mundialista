@@ -22,11 +22,11 @@ return [
         ],
     ],
 
-    'api_football' => [
-        'key' => env('API_FOOTBALL_KEY'),
-        'url' => env('API_FOOTBALL_URL', 'https://v3.football.api-sports.io'),
-        'league' => env('API_FOOTBALL_LEAGUE', 1),
-        'season' => env('API_FOOTBALL_SEASON', 2026),
-        'next' => env('API_FOOTBALL_NEXT', 30),
-    ],
+        'api_football' => [
+            'key' => env('API_FOOTBALL_KEY'),
+            'url' => env('API_FOOTBALL_URL', 'https://v3.football.api-sports.io'),
+            'league' => env('API_FOOTBALL_LEAGUE', 1),
+            'season' => env('API_FOOTBALL_SEASON', 2026),
+            'next' => env('API_FOOTBALL_NEXT', 30),
+        ],
 ];
