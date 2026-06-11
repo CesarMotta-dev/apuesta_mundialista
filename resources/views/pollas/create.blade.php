@@ -21,6 +21,19 @@
                 </div>
 
                 <div class="mt-4">
+                    <x-input-label for="partido_id" value="Partido a apostar" />
+                    <select id="partido_id" name="partido_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                        <option value="" disabled selected>Selecciona un partido...</option>
+                        @foreach($partidos as $partido)
+                            <option value="{{ $partido->id }}" {{ old('partido_id') == $partido->id ? 'selected' : '' }}>
+                                {{ $partido->equipo_local }} vs {{ $partido->equipo_visitante }} ({{ \Carbon\Carbon::parse($partido->fecha_inicio)->format('d M - H:i') }})
+                            </option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('partido_id')" class="mt-2" />
+                </div>
+
+                <div class="mt-4">
                     <x-input-label for="monto" value="Monto por apostador" />
                     <x-text-input id="monto" name="monto" type="number" min="0" step="1000" class="mt-1 block w-full" :value="old('monto')" required />
                     <x-input-error :messages="$errors->get('monto')" class="mt-2" />

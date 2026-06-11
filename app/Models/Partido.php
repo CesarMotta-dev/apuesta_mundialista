@@ -26,4 +26,9 @@ class Partido extends Model
         return $this->hasMany(Apuesta::class);
     }
 
+    public function pollas()
+    {
+        return $this->hasMany(Polla::class);
+    }
+
 }

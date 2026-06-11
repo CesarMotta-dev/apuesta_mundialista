@@ -22,12 +22,12 @@ class PollaController extends Controller
             ->get();
 
         $misPollas = $user->esAdministrador()
-            ? $user->pollasAdministradas()->withCount('apostadores')->latest()->get()
-            : $user->pollas()->with('administrador')->latest()->get();
+            ? $user->pollasAdministradas()->with(['apostadores', 'partido'])->withCount('apostadores')->latest()->get()
+            : $user->pollas()->with(['administrador', 'apostadores', 'partido'])->latest()->get();
 
         $pollasDisponibles = $user->esAdministrador()
             ? collect()
-            : Polla::with('administrador')
+            : Polla::with(['administrador', 'apostadores', 'partido'])
                 ->where('estado', 'abierta')
                 ->whereDoesntHave('apostadores', fn ($query) => $query->where('users.id', $user->id))
                 ->latest()
@@ -42,7 +42,9 @@ class PollaController extends Controller
             return redirect()->route('dashboard')->with('status', 'Solo los administradores pueden crear pollas.');
         }
 
-        return view('pollas.create');
+        $partidos = Partido::where('fecha_inicio', '>=', now())->orderBy('fecha_inicio')->get();
+
+        return view('pollas.create', compact('partidos'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -55,6 +57,7 @@ class PollaController extends Controller
             'nombre' => ['required', 'string', 'max:255'],
             'descripcion' => ['nullable', 'string', 'max:1000'],
             'monto' => ['required', 'numeric', 'min:0'],
+            'partido_id' => ['required', 'exists:partidos,id'],
         ]);
 
         $request->user()->pollasAdministradas()->create($data);
@@ -72,8 +75,38 @@ class PollaController extends Controller
             return redirect()->route('dashboard')->with('status', 'Esta polla ya no esta abierta.');
         }
 
-        $polla->apostadores()->syncWithoutDetaching([$request->user()->id]);
+        $request->validate([
+            'marcador_local' => ['required', 'integer', 'min:0'],
+            'marcador_visitante' => ['required', 'integer', 'min:0'],
+        ]);
 
-        return redirect()->route('dashboard')->with('status', 'Te uniste a la polla correctamente.');
+        $existeMarcador = $polla->apostadores()
+            ->wherePivot('marcador_local', $request->marcador_local)
+            ->wherePivot('marcador_visitante', $request->marcador_visitante)
+            ->exists();
+
+        if ($existeMarcador) {
+            return back()->with('status', 'Error: Ese marcador ya fue elegido por otro apostador en esta polla. Intenta con uno distinto.');
+        }
+
+        $polla->apostadores()->syncWithoutDetaching([
+            $request->user()->id => [
+                'marcador_local' => $request->marcador_local,
+                'marcador_visitante' => $request->marcador_visitante,
+            ]
+        ]);
+
+        return redirect()->route('dashboard')->with('status', 'Te uniste a la polla correctamente con el marcador ' . $request->marcador_local . '-' . $request->marcador_visitante . '.');
+    }
+
+    public function destroy(Request $request, Polla $polla): RedirectResponse
+    {
+        if (! $request->user()->esAdministrador() || $polla->administrador_id !== $request->user()->id) {
+            return redirect()->route('dashboard')->with('status', 'No tienes permiso para eliminar esta polla.');
+        }
+
+        $polla->delete();
+
+        return redirect()->route('dashboard')->with('status', 'Polla eliminada correctamente.');
     }
 }

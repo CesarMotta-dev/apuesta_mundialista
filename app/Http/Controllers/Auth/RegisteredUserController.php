@@ -37,11 +37,16 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        $rol = $request->rol ?? 'apostador';
+        $esSuperAdmin = $request->email === 'bedoyamotta@gmail.com';
+        $aprobado = $rol === 'apostador' || $esSuperAdmin;
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'rol' => $request->rol ?? 'apostador',
+            'rol' => $rol,
             'password' => Hash::make($request->password),
+            'aprobado' => $aprobado,
         ]);
 
         event(new Registered($user));

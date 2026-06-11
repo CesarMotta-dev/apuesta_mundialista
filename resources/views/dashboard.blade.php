@@ -13,8 +13,14 @@
                 </div>
             </div>
 
-            @if (auth()->user()->esAdministrador())
-                <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2">
+                @if (auth()->user()->esSuperAdmin())
+                    <a href="{{ route('superadmin.pendientes') }}" class="inline-flex min-h-[44px] items-center justify-center rounded-md bg-yellow-500 px-4 py-2 text-sm font-bold text-yellow-950 shadow-sm transition hover:bg-yellow-400">
+                        Autorizar Admins
+                    </a>
+                @endif
+
+                @if (auth()->user()->esAdministrador())
                     <form method="POST" action="{{ route('partidos.actualizar') }}">
                         @csrf
                         <button type="submit" class="inline-flex min-h-[44px] items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700">
@@ -25,8 +31,8 @@
                     <a href="{{ route('pollas.create') }}" class="inline-flex min-h-[44px] items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800">
                         Crear polla
                     </a>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
     </x-slot>
 
@@ -56,9 +62,22 @@
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
                                         <h4 class="text-lg font-black text-blue-950">{{ $polla->nombre }}</h4>
+                                        @if($polla->partido)
+                                            <p class="mt-1 text-xs font-bold text-blue-800">
+                                                Partido: <x-bandera :equipo="$polla->partido->equipo_local" /> {{ $polla->partido->equipo_local }} vs <x-bandera :equipo="$polla->partido->equipo_visitante" /> {{ $polla->partido->equipo_visitante }}
+                                                <span class="text-gray-500 font-normal">({{ \Carbon\Carbon::parse($polla->partido->fecha_inicio)->format('d M') }})</span>
+                                            </p>
+                                        @endif
                                         <p class="mt-1 text-sm text-gray-600">{{ $polla->descripcion ?: 'Sin descripcion' }}</p>
                                     </div>
-                                    <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-bold uppercase text-green-800">{{ $polla->estado }}</span>
+                                    <div class="flex flex-col items-end gap-2">
+                                        <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-bold uppercase text-green-800">{{ $polla->estado }}</span>
+                                        <form method="POST" action="{{ route('pollas.destroy', $polla) }}" onsubmit="return confirm('¿Estás seguro de eliminar esta polla? Esta acción no se puede deshacer.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-xs font-bold text-red-600 hover:text-red-800 hover:underline transition">Eliminar polla</button>
+                                        </form>
+                                    </div>
                                 </div>
 
                                 <div class="mt-5 grid grid-cols-2 gap-3 text-sm">
@@ -69,6 +88,19 @@
                                     <div class="rounded-md bg-gray-50 p-3">
                                         <p class="font-semibold text-gray-500">Apostadores</p>
                                         <p class="text-lg font-black text-gray-900">{{ $polla->apostadores_count }}</p>
+                                    </div>
+                                    <div class="col-span-2 rounded-md bg-gray-50 p-3">
+                                        <p class="font-semibold text-gray-500 mb-2">Marcadores Registrados</p>
+                                        <div class="flex flex-wrap gap-2">
+                                            @forelse($polla->apostadores as $apostador)
+                                                <span class="rounded bg-white px-2 py-1 text-xs border font-bold text-gray-800">
+                                                    {{ $apostador->pivot->marcador_local }} - {{ $apostador->pivot->marcador_visitante }}
+                                                    <span class="font-normal text-gray-500">({{ $apostador->name }})</span>
+                                                </span>
+                                            @empty
+                                                <span class="text-xs text-gray-400">Nadie se ha unido aún</span>
+                                            @endforelse
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -90,16 +122,54 @@
                         @forelse ($pollasDisponibles as $polla)
                             <div class="rounded-lg border border-emerald-100 bg-white p-5 shadow-md">
                                 <h4 class="text-lg font-black text-emerald-950">{{ $polla->nombre }}</h4>
+                                @if($polla->partido)
+                                    <div class="mt-2 rounded bg-emerald-50 px-3 py-2 text-sm border border-emerald-100">
+                                        <p class="font-bold text-emerald-900 flex items-center gap-1">
+                                            Partido: <x-bandera :equipo="$polla->partido->equipo_local" /> {{ $polla->partido->equipo_local }} vs <x-bandera :equipo="$polla->partido->equipo_visitante" /> {{ $polla->partido->equipo_visitante }}
+                                        </p>
+                                        <p class="text-xs text-emerald-700">{{ \Carbon\Carbon::parse($polla->partido->fecha_inicio)->format('d M - H:i') }}</p>
+                                    </div>
+                                @endif
                                 <p class="mt-1 text-sm text-gray-600">Admin: {{ $polla->administrador->name }}</p>
                                 <p class="mt-3 text-sm text-gray-700">{{ $polla->descripcion ?: 'Sin descripcion' }}</p>
                                 <p class="mt-4 text-lg font-black text-gray-900">${{ number_format($polla->monto, 0, ',', '.') }}</p>
 
-                                <form method="POST" action="{{ route('pollas.join', $polla) }}" class="mt-4">
+                                <form method="POST" action="{{ route('pollas.join', $polla) }}" class="mt-4 border-t pt-4">
                                     @csrf
+                                    <p class="text-sm font-bold text-gray-700 mb-2">Elige tu marcador para esta polla:</p>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <div class="flex-1 text-center">
+                                            <label class="flex justify-center items-center gap-1 text-xs text-gray-500 mb-1 truncate">
+                                                @if($polla->partido) <x-bandera :equipo="$polla->partido->equipo_local" /> @endif
+                                                {{ $polla->partido ? $polla->partido->equipo_local : 'Local' }}
+                                            </label>
+                                            <input type="number" name="marcador_local" min="0" required class="w-16 rounded border-gray-300 px-2 py-1 text-center font-bold text-gray-900 shadow-sm" placeholder="L">
+                                        </div>
+                                        <span class="font-bold text-gray-500 mt-4">-</span>
+                                        <div class="flex-1 text-center">
+                                            <label class="flex justify-center items-center gap-1 text-xs text-gray-500 mb-1 truncate">
+                                                @if($polla->partido) <x-bandera :equipo="$polla->partido->equipo_visitante" /> @endif
+                                                {{ $polla->partido ? $polla->partido->equipo_visitante : 'Visitante' }}
+                                            </label>
+                                            <input type="number" name="marcador_visitante" min="0" required class="w-16 rounded border-gray-300 px-2 py-1 text-center font-bold text-gray-900 shadow-sm" placeholder="V">
+                                        </div>
+                                    </div>
                                     <button type="submit" class="inline-flex min-h-[44px] w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-700">
                                         Unirme a esta polla
                                     </button>
                                 </form>
+                                <div class="mt-4 text-sm bg-gray-50 p-2 rounded">
+                                    <p class="font-bold text-gray-600 mb-1 text-xs uppercase tracking-wide">Marcadores ya tomados:</p>
+                                    <div class="flex flex-wrap gap-1">
+                                        @forelse($polla->apostadores as $apostador)
+                                            <span class="rounded bg-white px-2 py-0.5 text-xs font-bold text-gray-600 border border-gray-200">
+                                                {{ $apostador->pivot->marcador_local }} - {{ $apostador->pivot->marcador_visitante }}
+                                            </span>
+                                        @empty
+                                            <span class="text-xs text-gray-400">Ninguno todavía. ¡Sé el primero!</span>
+                                        @endforelse
+                                    </div>
+                                </div>
                             </div>
                         @empty
                             <div class="rounded-lg border border-dashed border-emerald-300 bg-white/90 p-6 text-center md:col-span-2 xl:col-span-3">
@@ -116,8 +186,36 @@
                         @forelse ($misPollas as $polla)
                             <div class="rounded-lg border border-yellow-200 bg-white p-5 shadow-md">
                                 <h4 class="text-lg font-black text-blue-950">{{ $polla->nombre }}</h4>
+                                @if($polla->partido)
+                                    <p class="mt-1 text-sm font-bold text-blue-800">
+                                        <x-bandera :equipo="$polla->partido->equipo_local" /> {{ $polla->partido->equipo_local }} vs <x-bandera :equipo="$polla->partido->equipo_visitante" /> {{ $polla->partido->equipo_visitante }}
+                                    </p>
+                                @endif
                                 <p class="mt-1 text-sm text-gray-600">Admin: {{ $polla->administrador->name }}</p>
                                 <p class="mt-4 text-lg font-black text-gray-900">${{ number_format($polla->monto, 0, ',', '.') }}</p>
+                                
+                                @php
+                                    $miApostador = $polla->apostadores->firstWhere('id', auth()->id());
+                                @endphp
+                                @if($miApostador)
+                                <div class="mt-3 rounded-md bg-yellow-50 p-2 border border-yellow-100">
+                                    <p class="text-sm text-yellow-800 font-semibold">Tu marcador: 
+                                        <span class="font-black">{{ $miApostador->pivot->marcador_local }} - {{ $miApostador->pivot->marcador_visitante }}</span>
+                                    </p>
+                                </div>
+                                @endif
+
+                                <div class="mt-3 text-xs border-t border-yellow-100 pt-3">
+                                    <p class="font-bold text-gray-600 mb-2">Todos los marcadores de la polla:</p>
+                                    <div class="flex flex-wrap gap-1">
+                                        @foreach($polla->apostadores as $apostador)
+                                            <span class="rounded {{ $apostador->id === auth()->id() ? 'bg-yellow-200 text-yellow-900 border-yellow-300' : 'bg-gray-100 text-gray-700 border-gray-200' }} px-2 py-0.5 font-bold border">
+                                                {{ $apostador->pivot->marcador_local }} - {{ $apostador->pivot->marcador_visitante }}
+                                                <span class="font-normal opacity-75">({{ $apostador->name }})</span>
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </div>
                             </div>
                         @empty
                             <div class="rounded-lg border border-dashed border-yellow-300 bg-white/90 p-6 text-center md:col-span-2 xl:col-span-3">
@@ -152,9 +250,15 @@
                             </div>
 
                             <div class="my-5 flex items-center justify-between gap-2 text-lg font-black text-blue-900">
-                                <span class="flex-1 break-words text-center">{{ $partido->equipo_local }}</span>
+                                <span class="flex-1 break-words text-center flex flex-col items-center gap-1">
+                                    <x-bandera :equipo="$partido->equipo_local" />
+                                    {{ $partido->equipo_local }}
+                                </span>
                                 <span class="shrink-0 text-sm text-red-600">VS</span>
-                                <span class="flex-1 break-words text-center">{{ $partido->equipo_visitante }}</span>
+                                <span class="flex-1 break-words text-center flex flex-col items-center gap-1">
+                                    <x-bandera :equipo="$partido->equipo_visitante" />
+                                    {{ $partido->equipo_visitante }}
+                                </span>
                             </div>
 
                             <a href="#" class="inline-flex min-h-[44px] w-full items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-800">
@@ -181,8 +285,8 @@
                                     <p class="text-xs font-bold uppercase text-gray-500">
                                         {{ \Carbon\Carbon::parse($partido->fecha_inicio)->format('d M Y - h:i A') }} · {{ ucfirst($partido->estado) }}
                                     </p>
-                                    <p class="mt-1 text-base font-black text-gray-900">
-                                        {{ $partido->equipo_local }} vs {{ $partido->equipo_visitante }}
+                                    <p class="mt-1 text-base font-black text-gray-900 flex items-center gap-1">
+                                        <x-bandera :equipo="$partido->equipo_local" /> {{ $partido->equipo_local }} vs <x-bandera :equipo="$partido->equipo_visitante" /> {{ $partido->equipo_visitante }}
                                     </p>
                                 </div>
 

@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'rol',
+        'aprobado',
     ];
 
     /**
@@ -61,5 +62,10 @@ class User extends Authenticatable
     public function esAdministrador(): bool
     {
         return $this->rol === 'administrador';
+    }
+
+    public function esSuperAdmin(): bool
+    {
+        return $this->email === 'bedoyamotta@gmail.com';
     }
 }

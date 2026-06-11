@@ -12,6 +12,7 @@ class Polla extends Model
         'descripcion',
         'monto',
         'estado',
+        'partido_id',
     ];
 
     protected $casts = [
@@ -25,10 +26,12 @@ class Polla extends Model
 
     public function apostadores()
     {
-        return $this->belongsToMany(User::class, 'polla_user')->withTimestamps();
+        return $this->belongsToMany(User::class, 'polla_user')
+            ->withPivot(['marcador_local', 'marcador_visitante'])
+            ->withTimestamps();
     }
 
-    public function partidos() {
-    return $this->hasMany(Partido::class);
-}
+    public function partido() {
+        return $this->belongsTo(Partido::class);
+    }
 }
